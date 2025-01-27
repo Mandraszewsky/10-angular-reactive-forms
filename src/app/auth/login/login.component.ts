@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { of } from 'rxjs';
+import { debounceTime, of } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -9,7 +9,9 @@ import { of } from 'rxjs';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
+
   // form setup:
   form = new FormGroup({
     email: new FormControl('', {
@@ -20,6 +22,27 @@ export class LoginComponent {
       validators: [Validators.required, Validators.minLength(6), mustContainQuestionMark]
     })
   });
+
+  ngOnInit() {
+    const savedForm = window.localStorage.getItem('saved-login-form');
+
+    if(savedForm){
+      const loadedForm = JSON.parse(savedForm);
+
+      // patchValue is an reactive feature that enables to update pointed control values (also form can be updated via form.controls.email.setValue):
+      this.form.patchValue({
+        email: loadedForm.email
+      });
+    }
+
+    const subscription = this.form.valueChanges.pipe(debounceTime(500)).subscribe({
+      next: (value) => {
+        window.localStorage.setItem('saved-login-form', JSON.stringify({ email: value.email }));
+      }
+    })
+
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
 
   get emailIsInvalid() {
     return (this.form.controls.email.touched && this.form.controls.email.dirty && this.form.controls.email.invalid);
@@ -35,7 +58,7 @@ export class LoginComponent {
   }
 }
 
-//dummy validator as an example for custom validator:
+// dummy validator as an example for custom validator:
 function mustContainQuestionMark(control: AbstractControl) {
   if (control.value.includes('?')) {
     return null;
@@ -44,7 +67,7 @@ function mustContainQuestionMark(control: AbstractControl) {
   return { doesNotContainQuestionMark: true };
 }
 
-//dummy async validator as an example for custom validator, observable with async for example should send http request:
+// dummy async validator as an example for custom validator, observable with async for example should send http request:
 function emailIsUnique(control: AbstractControl) {
   if (control.value !== 'test@example.com') {
     return of(null); // of - produce an observable that emits a value, in this case = null
