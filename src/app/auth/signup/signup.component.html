@@ -7,7 +7,8 @@
     <input id="email" type="email" name="email" formControlName="email"/>
   </div>
 
-  <div class="control-row">
+      <!-- point formGroup via formGroupName, also it can be done via directive [formGroup]="form.controls.passwords" -->
+  <div class="control-row" formGroupName="passwords">
     <div class="control">
       <label for="password">Password</label>
       <input id="password" type="password" name="password" formControlName="password"/>
@@ -34,7 +35,8 @@
       </div>
     </div>
 
-    <fieldset>
+    <!-- point formGroup via formGroupName, also it can be done via directive [formGroup]="form.controls.address" -->
+    <fieldset formGroupName="address">
       <legend>Your Address</legend>
 
       <div class="control-row">
@@ -78,20 +80,21 @@
     </div>
   </div>
 
-  <fieldset>
+    <!-- point formArray via formArrayName, controls binded to this array should inrement formControlName directive with array indexes -->
+  <fieldset formArrayName="source">
     <legend>How did you find us?</legend>
     <div class="control">
-      <input type="checkbox" id="google" name="acquisition" value="google" />
+      <input type="checkbox" id="google" name="acquisition" value="google" formControlName="0" />
       <label for="google">Google</label>
     </div>
 
     <div class="control">
-      <input type="checkbox" id="friend" name="acquisition" value="friend" />
+      <input type="checkbox" id="friend" name="acquisition" value="friend" formControlName="1" />
       <label for="friend">Referred by friend</label>
     </div>
 
     <div class="control">
-      <input type="checkbox" id="other" name="acquisition" value="other" />
+      <input type="checkbox" id="other" name="acquisition" value="other" formControlName="2" />
       <label for="other">Other</label>
     </div>
   </fieldset>
